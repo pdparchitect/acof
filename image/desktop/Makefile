@@ -1,14 +1,14 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-# The Rook desktop image compiles rook from source, so the Docker build context
+# The Acof desktop image compiles acof from source, so the Docker build context
 # is the repository root (two levels up), while this Makefile and the Dockerfile
 # live here under image/desktop.
 ROOT := $(abspath $(CURDIR)/../..)
 
 DOCKER ?= docker
-IMAGE ?= pdparchitect/rook-desktop:local
-CONTAINER ?= rook-desktop
+IMAGE ?= pdparchitect/acof-desktop:local
+CONTAINER ?= acof-desktop
 NATIVE_ARCH := $(shell uname -m | sed \
 	-e 's/^x86_64$$/amd64/' \
 	-e 's/^aarch64$$/arm64/')
@@ -21,7 +21,7 @@ BIND_ADDRESS ?= 127.0.0.1
 # /healthz, /preview.jpg and /notifications.
 PORT ?= 6901
 PREVIEW_PORT ?= 6902
-VOLUME_PREFIX ?= rook-desktop
+VOLUME_PREFIX ?= acof-desktop
 
 # Pass render nodes only. `--device=/dev/dri` would also hand over the DRM
 # master node, which nothing in this container needs.
@@ -30,7 +30,7 @@ GPU_DEVICE := $(shell for node in /dev/dri/renderD*; do \
 
 # Each backend reads its provider's conventional key from the environment; pass
 # through any set on the host so a run inside the session needs no re-entry. A
-# key can also be saved into the config via `rook config` inside the session.
+# key can also be saved into the config via `acof config` inside the session.
 PROVIDER_ENVS := ZAI_API_KEY OPENAI_API_KEY ANTHROPIC_API_KEY GROQ_API_KEY \
 	MISTRAL_API_KEY DEEPSEEK_API_KEY OPENROUTER_API_KEY TOGETHER_API_KEY \
 	CEREBRAS_API_KEY XAI_API_KEY MOONSHOT_API_KEY DASHSCOPE_API_KEY
@@ -40,11 +40,11 @@ KEY_ENV := $(foreach v,$(PROVIDER_ENVS),\
 .PHONY: help check build run recreate up test smoke stop logs vnc-log status url
 
 help:
-	@echo "Rook desktop local Docker workflow"
+	@echo "Acof desktop local Docker workflow"
 	@echo
 	@echo "  make check      Validate overlay scripts and image metadata"
-	@echo "  make build      Build $(IMAGE) (compiles rook from source)"
-	@echo "  make run        Start or create the Rook desktop container"
+	@echo "  make build      Build $(IMAGE) (compiles acof from source)"
+	@echo "  make run        Start or create the Acof desktop container"
 	@echo "  make recreate   Recreate the container without rebuilding"
 	@echo "  make up         Build and recreate the container"
 	@echo "  make test       Check, build, run, and smoke-test the desktop"
@@ -89,7 +89,7 @@ run:
 			--publish "$(BIND_ADDRESS):$(PREVIEW_PORT):6902" \
 			$(KEY_ENV) \
 			--volume "$(VOLUME_PREFIX)-workspace:/workspace" \
-			--volume "$(VOLUME_PREFIX)-config:/home/agent/.config/rook" \
+			--volume "$(VOLUME_PREFIX)-config:/home/agent/.config/acof" \
 			"$(IMAGE)"; \
 	fi
 	@$(MAKE) --no-print-directory url
@@ -103,7 +103,7 @@ up: build recreate
 test: check up smoke
 
 smoke:
-	@echo "Waiting for the Rook desktop at http://$(BIND_ADDRESS):$(PORT) ..."
+	@echo "Waiting for the Acof desktop at http://$(BIND_ADDRESS):$(PORT) ..."
 	@ready=false; \
 	for attempt in $$(seq 1 60); do \
 		if curl --fail --silent "http://$(BIND_ADDRESS):$(PORT)/index.html" >/dev/null && \
@@ -114,12 +114,12 @@ smoke:
 		sleep 2; \
 	done; \
 	if [ "$$ready" != "true" ]; then \
-		echo "Rook desktop did not become ready within 120 seconds."; \
+		echo "Acof desktop did not become ready within 120 seconds."; \
 		$(DOCKER) logs --tail 150 "$(CONTAINER)" || true; \
 		exit 1; \
 	fi
 	@$(DOCKER) exec "$(CONTAINER)" desktop-selftest
-	@echo "Rook desktop is ready."
+	@echo "Acof desktop is ready."
 
 stop:
 	@if $(DOCKER) container inspect "$(CONTAINER)" >/dev/null 2>&1; then \

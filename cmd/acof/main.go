@@ -1,9 +1,9 @@
-// Command rook is an AI bug-hunting harness for vulnerability research, bug
+// Command acof is an AI bug-hunting harness for vulnerability research, bug
 // hunting and source-code auditing. It runs the zot autonomous engine
 // in-process and ships lean: the only embedded skill is a catalog that points
 // the agent at external skill collections it fetches on demand.
 //
-// rook takes objectives, not prompts. An objective is a small YAML file - the
+// acof takes objectives, not prompts. An objective is a small YAML file - the
 // durable goal, the success criteria that define "done", and the rules of
 // engagement the work must hold to - and each objective becomes one autonomous
 // run: the agent reads files, runs commands and investigates on its own while
@@ -13,25 +13,25 @@
 //
 //	export ZAI_API_KEY="[redacted]"
 //
-//	# write an objective, then run it - objectives and their records live under .rook/
-//	rook new "Audit the HTTP handlers in ./server for injection bugs"
-//	rook
+//	# write an objective, then run it - objectives and their records live under .acof/
+//	acof new "Audit the HTTP handlers in ./server for injection bugs"
+//	acof
 //
-//	# a bare rook runs every outstanding objective in the dossier, in filename
+//	# a bare acof runs every outstanding objective in the dossier, in filename
 //	# order, skipping what the ledger already records as done; naming objectives
 //	# runs exactly those
-//	rook .rook/objectives/audit-the-http-handlers-in-server-for-injec.yaml
+//	acof .acof/objectives/audit-the-http-handlers-in-server-for-injec.yaml
 //
 //	# every run writes artifacts (status + events) and a ledger receipt
-//	rook .rook/objectives/hunt.yaml
+//	acof .acof/objectives/hunt.yaml
 //
-//	rook config          # edit the config (provider, model, key)
-//	rook version
+//	acof config          # edit the config (provider, model, key)
+//	acof version
 //
-// Configuration is layered: built-in defaults < config file < ROOK_* env vars <
-// CLI flags. The config file is optional and lives at ~/.config/rook/config.yaml
-// (override with $ROOK_CONFIG or --config). See configs/rook.example.yaml.
-// rook is intended for authorized security testing only. Only run it against
+// Configuration is layered: built-in defaults < config file < ACOF_* env vars <
+// CLI flags. The config file is optional and lives at ~/.config/acof/config.yaml
+// (override with $ACOF_CONFIG or --config). See configs/acof.example.yaml.
+// acof is intended for authorized security testing only. Only run it against
 // systems, code and services you own or are explicitly authorized to assess.
 package main
 
@@ -51,26 +51,26 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/pflag"
 
-	rook "github.com/pdparchitect/rook"
-	"github.com/pdparchitect/rook/internal/agent"
-	"github.com/pdparchitect/rook/internal/buildinfo"
-	"github.com/pdparchitect/rook/internal/config"
-	"github.com/pdparchitect/rook/internal/objective"
-	"github.com/pdparchitect/rook/internal/version"
+	acof "github.com/pdparchitect/acof"
+	"github.com/pdparchitect/acof/internal/agent"
+	"github.com/pdparchitect/acof/internal/buildinfo"
+	"github.com/pdparchitect/acof/internal/config"
+	"github.com/pdparchitect/acof/internal/objective"
+	"github.com/pdparchitect/acof/internal/version"
 
 	"github.com/openzot/openzot/session"
 )
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, "rook: "+err.Error())
+		fmt.Fprintln(os.Stderr, "acof: "+err.Error())
 		os.Exit(1)
 	}
 }
 
 func run() error {
-	// `rook config` opens the config file in $EDITOR, seeding it from the
-	// embedded template on first run. `rook config path` prints its location.
+	// `acof config` opens the config file in $EDITOR, seeding it from the
+	// embedded template on first run. `acof config path` prints its location.
 	if len(os.Args) > 1 && os.Args[1] == "config" {
 		if len(os.Args) > 2 && os.Args[2] == "path" {
 			fmt.Println(config.DefaultConfigPath())
@@ -79,46 +79,46 @@ func run() error {
 		return editConfig()
 	}
 
-	// `rook new` scaffolds an objective. The two-step shape is deliberate: the
+	// `acof new` scaffolds an objective. The two-step shape is deliberate: the
 	// pause between writing the objective and running it is where success
-	// criteria get written, and it is what keeps rook from feeling like a
+	// criteria get written, and it is what keeps acof from feeling like a
 	// prompt box.
 	if len(os.Args) > 1 && os.Args[1] == "new" {
 		return newObjective(os.Args[2:], os.Stdout)
 	}
 
-	flags := pflag.NewFlagSet("rook", pflag.ContinueOnError)
-	configPath := flags.String("config", "", "path to the config file (default: $ROOK_CONFIG or ~/.config/rook/config.yaml)")
+	flags := pflag.NewFlagSet("acof", pflag.ContinueOnError)
+	configPath := flags.String("config", "", "path to the config file (default: $ACOF_CONFIG or ~/.config/acof/config.yaml)")
 	provider := flags.String("provider", "", "model provider to run against: zai (default), openai, anthropic, groq, ollama, or a provider named in the config")
 	model := flags.String("model", "", "model the agent reasons with (overrides config)")
 	dir := flags.String("dir", ".", "working directory the agent investigates: the objective runs against this tree")
 	maxIter := flags.Int("max-iterations", 0, "maximum agent iterations before forced stop (overrides config)")
-	runDir := flags.String("run-dir", "", "base directory for per-run artifacts (default: $ROOK_RUN_DIR or ~/.local/state/rook/runs)")
-	sessionDir := flags.String("session-dir", "", "where session logs are written (default: ./.rook/sessions)")
+	runDir := flags.String("run-dir", "", "base directory for per-run artifacts (default: $ACOF_RUN_DIR or ~/.local/state/acof/runs)")
+	sessionDir := flags.String("session-dir", "", "where session logs are written (default: ./.acof/sessions)")
 	noSession := flags.Bool("no-session", false, "do not record a session log for this run")
 	resume := flags.String("resume", "", "continue an earlier session: an id, a path, or \"last\"")
-	objectivesFlag := flags.String("objectives-dir", "", "where this project's objectives live, run by a bare `rook` (default: ./.rook/objectives)")
-	recordsDir := flags.String("records-dir", "", "where run records are written (default: ./.rook/records)")
+	objectivesFlag := flags.String("objectives-dir", "", "where this project's objectives live, run by a bare `acof` (default: ./.acof/objectives)")
+	recordsDir := flags.String("records-dir", "", "where run records are written (default: ./.acof/records)")
 	watchFlag := flags.Bool("watch", false, "stay up and run objectives as they arrive, instead of running once and exiting: bare --watch watches this project's objectives directory, or name a folder to watch instead")
 	rerun := flags.Bool("rerun", false, "run objectives even when the ledger already records a successful run of the same content")
 	verbose := flags.BoolP("verbose", "v", false, "stream plain output (with reasoning tokens) instead of the full-screen viewer")
 	showVersion := flags.BoolP("version", "V", false, "print version and exit")
 
 	flags.Usage = func() {
-		fmt.Fprintf(os.Stderr, "rook - AI bug-hunting harness\n\n")
-		fmt.Fprintf(os.Stderr, "Usage:\n  rook [flags] [objective...]\n  rook new \"the objective\"\n  rook sessions\n  rook config\n  rook version\n\n")
-		fmt.Fprintf(os.Stderr, "A bare `rook` runs every outstanding objective in .rook/objectives/.\n\nFlags:\n")
+		fmt.Fprintf(os.Stderr, "acof - AI bug-hunting harness\n\n")
+		fmt.Fprintf(os.Stderr, "Usage:\n  acof [flags] [objective...]\n  acof new \"the objective\"\n  acof sessions\n  acof config\n  acof version\n\n")
+		fmt.Fprintf(os.Stderr, "A bare `acof` runs every outstanding objective in .acof/objectives/.\n\nFlags:\n")
 		flags.PrintDefaults()
 	}
 
-	// Allow `rook version` as a subcommand in addition to the --version flag.
+	// Allow `acof version` as a subcommand in addition to the --version flag.
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "version" {
 		printVersion()
 		return nil
 	}
 
-	// `rook sessions` lists what previous runs left behind. Its own subcommand
+	// `acof sessions` lists what previous runs left behind. Its own subcommand
 	// because it takes no objective and produces no run.
 	if len(args) > 0 && args[0] == "sessions" {
 		return listSessions(args[1:])
@@ -133,7 +133,7 @@ func run() error {
 		return nil
 	}
 
-	// A .env in the working directory is read only on a developer build. Rook
+	// A .env in the working directory is read only on a developer build. Acof
 	// runs shell commands against targets with a provider key in the process, so
 	// a released binary must not take credentials from whatever directory it was
 	// pointed at - a stray committed .env in the code under review would
@@ -173,8 +173,8 @@ func run() error {
 	resolvedRunDir := firstNonEmpty(*runDir, cfg.RunDir, config.DefaultRunDir())
 	resolvedRunDir = expandPath(resolvedRunDir)
 
-	// The objectives directory: what a bare `rook` runs and what a bare
-	// --watch watches. Defaults to ./.rook/objectives. Resolved against the
+	// The objectives directory: what a bare `acof` runs and what a bare
+	// --watch watches. Defaults to ./.acof/objectives. Resolved against the
 	// invoking directory (before the chdir into --dir) so a relative path means
 	// what was typed.
 	objectivesRoot := *objectivesFlag
@@ -185,7 +185,7 @@ func run() error {
 		objectivesRoot = abs
 	}
 
-	// The ledger: where run records are written. Defaults to ./.rook/records.
+	// The ledger: where run records are written. Defaults to ./.acof/records.
 	records := *recordsDir
 	if records == "" {
 		records = objective.RecordsDir(".")
@@ -196,7 +196,7 @@ func run() error {
 	ledger := objective.Ledger{Root: records}
 
 	// Session logs: where the run's conversation is recorded for inspection and
-	// resume. Defaults to ./.rook/sessions, resolved before the chdir.
+	// resume. Defaults to ./.acof/sessions, resolved before the chdir.
 	sessions := *sessionDir
 	if sessions == "" {
 		sessions = config.DefaultSessionDir()
@@ -225,7 +225,7 @@ func run() error {
 			return fmt.Errorf("read session: %w", err)
 		}
 
-		fmt.Fprintf(os.Stderr, "rook: resuming %s (%d messages)\n", resumed.Meta.ID, len(resumed.Messages))
+		fmt.Fprintf(os.Stderr, "acof: resuming %s (%d messages)\n", resumed.Meta.ID, len(resumed.Messages))
 	}
 
 	if *noSession {
@@ -300,7 +300,7 @@ func run() error {
 
 	for i, o := range paths {
 		if len(paths) > 1 {
-			fmt.Fprintf(os.Stderr, "rook: objective %d/%d: %s\n", i+1, len(paths), o.Path)
+			fmt.Fprintf(os.Stderr, "acof: objective %d/%d: %s\n", i+1, len(paths), o.Path)
 		}
 
 		if err := runner.execute(o, i < len(paths)-1); err != nil {
@@ -349,7 +349,7 @@ type runRunner struct {
 func (r runRunner) execute(o objective.Objective, quitOnDone bool) error {
 	if record, done := r.ledger.Satisfied(o); done && !r.rerun {
 		fmt.Fprintf(os.Stderr,
-			"rook: objective %s already satisfied by run %s (%s); edit the objective or pass --rerun to run it again\n",
+			"acof: objective %s already satisfied by run %s (%s); edit the objective or pass --rerun to run it again\n",
 			o.Path, record.Run, record.At.Format("2006-01-02 15:04"))
 
 		return nil
@@ -388,7 +388,7 @@ func (r runRunner) execute(o objective.Objective, quitOnDone bool) error {
 		}, nil)
 
 		if err := r.ledger.Record(o, runID, "settled", time.Now(), proof); err != nil {
-			fmt.Fprintf(os.Stderr, "rook: could not record the outcome for %s: %v\n", o.Path, err)
+			fmt.Fprintf(os.Stderr, "acof: could not record the outcome for %s: %v\n", o.Path, err)
 		}
 	}
 
@@ -408,10 +408,10 @@ func resolveObjectives(args []string, objectivesRoot string) ([]objective.Object
 		if len(found) == 0 {
 			flagsUsage()
 			where := objectivesRoot + " holds none"
-			return nil, fmt.Errorf("no objective given, and %s (write one with `rook new \"the objective\"`)", where)
+			return nil, fmt.Errorf("no objective given, and %s (write one with `acof new \"the objective\"`)", where)
 		}
 
-		fmt.Fprintf(os.Stderr, "rook: running %d objective(s) from %s\n", len(found), objectivesRoot)
+		fmt.Fprintf(os.Stderr, "acof: running %d objective(s) from %s\n", len(found), objectivesRoot)
 		args = found
 	}
 
@@ -424,7 +424,7 @@ func resolveObjectives(args []string, objectivesRoot string) ([]objective.Object
 			// goes. The error has to teach the new shape, not just report a
 			// missing file.
 			if _, statErr := os.Stat(path); statErr != nil && strings.ContainsAny(path, " \t") {
-				return nil, fmt.Errorf("objectives are files, not prose - write the objective first:\n\n  rook new %q", path)
+				return nil, fmt.Errorf("objectives are files, not prose - write the objective first:\n\n  acof new %q", path)
 			}
 
 			return nil, err
@@ -444,7 +444,7 @@ func resolveObjectives(args []string, objectivesRoot string) ([]objective.Object
 // It polls the directory at an interval rather than using inotify, because a
 // cross-platform poll is simpler and the arrival rate of objectives is low.
 func startWatch(ctx context.Context, target string, runner runRunner) error {
-	fmt.Fprintf(os.Stderr, "rook: watching %s for objectives (Ctrl-C to stop)\n\n", target)
+	fmt.Fprintf(os.Stderr, "acof: watching %s for objectives (Ctrl-C to stop)\n\n", target)
 
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
@@ -472,28 +472,28 @@ func startWatch(ctx context.Context, target string, runner runRunner) error {
 
 				o, err := objective.Load(path)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "rook: skipping %s: %v\n", path, err)
+					fmt.Fprintf(os.Stderr, "acof: skipping %s: %v\n", path, err)
 					continue
 				}
 
 				if err := runner.execute(o, false); err != nil {
-					fmt.Fprintf(os.Stderr, "rook: %s: %v\n", path, err)
+					fmt.Fprintf(os.Stderr, "acof: %s: %v\n", path, err)
 				}
 			}
 		}
 	}
 }
 
-// newObjective scaffolds an objective under ./.rook/objectives and says how to
+// newObjective scaffolds an objective under ./.acof/objectives and says how to
 // run it.
 //
-// Two levels of help, both landing in the same reviewable file: bare `rook new`
-// writes the blank form, and `rook new "objective"` fills the objective in. The
+// Two levels of help, both landing in the same reviewable file: bare `acof new`
+// writes the blank form, and `acof new "objective"` fills the objective in. The
 // objective will not run until its objective and success criteria are filled in.
 func newObjective(args []string, out io.Writer) error {
 	set := pflag.NewFlagSet("new", pflag.ContinueOnError)
-	dir := set.String("dir", ".", "working directory the objective is for: the scaffold lands under <dir>/.rook/objectives")
-	objectivesFlag := set.String("objectives-dir", "", "where to write the objective (default: <dir>/.rook/objectives)")
+	dir := set.String("dir", ".", "working directory the objective is for: the scaffold lands under <dir>/.acof/objectives")
+	objectivesFlag := set.String("objectives-dir", "", "where to write the objective (default: <dir>/.acof/objectives)")
 
 	if err := set.Parse(args); err != nil {
 		return err
@@ -522,7 +522,7 @@ func newObjective(args []string, out io.Writer) error {
 	}
 
 	fmt.Fprintf(out, "Scaffolded %s\n", path)
-	fmt.Fprintf(out, "%s, then run:\n  rook %s\n", edit, path)
+	fmt.Fprintf(out, "%s, then run:\n  acof %s\n", edit, path)
 
 	return nil
 }
@@ -530,8 +530,8 @@ func newObjective(args []string, out io.Writer) error {
 func printVersion() {
 	// the build kind is on the version line because it changes what the binary
 	// reads from disk: "why is my .env ignored" should be answerable from here.
-	fmt.Printf("rook %s (%s)\n", version.Version, buildinfo.Kind)
-	// No config is loaded for `rook version`; the env switch still applies.
+	fmt.Printf("acof %s (%s)\n", version.Version, buildinfo.Kind)
+	// No config is loaded for `acof version`; the env switch still applies.
 	notifyUpdate(false)
 }
 
@@ -546,7 +546,7 @@ func editConfig() error {
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.WriteFile(path, rook.ExampleConfigYAML, 0o600); err != nil {
+		if err := os.WriteFile(path, acof.ExampleConfigYAML, 0o600); err != nil {
 			return fmt.Errorf("write config template: %w", err)
 		}
 		fmt.Fprintf(os.Stderr, "Created %s from the template.\n", path)
@@ -600,7 +600,7 @@ func expandPath(p string) string {
 // notifyUpdate prints a one-line notice to stderr when a newer release exists.
 // It is silently skipped for dev builds and on any network error, and turned
 // off entirely by update_check.disabled in the config or the
-// ROOK_UPDATE_CHECK_DISABLED environment variable - the latter needing no
+// ACOF_UPDATE_CHECK_DISABLED environment variable - the latter needing no
 // config file, so it works on a locked-down host. The check is the one call a
 // run makes that is not to the model provider.
 func notifyUpdate(disabled bool) {
@@ -616,14 +616,14 @@ func notifyUpdate(disabled bool) {
 	}
 }
 
-// updateCheckDisabledByEnv reports whether ROOK_UPDATE_CHECK_DISABLED is set to
+// updateCheckDisabledByEnv reports whether ACOF_UPDATE_CHECK_DISABLED is set to
 // a truthy value. The config loader already folds this variable into
 // UpdateCheck.Disabled for any command that loads config; this covers the one
-// that does not - `rook version` - so the switch works without a config file,
+// that does not - `acof version` - so the switch works without a config file,
 // which is the case that matters on an air-gapped or CI box. Same truthiness as
 // the config loader (strconv.ParseBool) so both agree.
 func updateCheckDisabledByEnv() bool {
-	v, err := strconv.ParseBool(strings.TrimSpace(os.Getenv("ROOK_UPDATE_CHECK_DISABLED")))
+	v, err := strconv.ParseBool(strings.TrimSpace(os.Getenv("ACOF_UPDATE_CHECK_DISABLED")))
 	return err == nil && v
 }
 
@@ -631,9 +631,9 @@ func updateCheckDisabledByEnv() bool {
 // is local to run(), and resolveObjectives needs to print the same usage when the
 // objectives directory is empty.
 func flagsUsage() {
-	fmt.Fprintf(os.Stderr, "rook - AI bug-hunting harness\n\n")
-	fmt.Fprintf(os.Stderr, "Usage:\n  rook [flags] [objective...]\n  rook new \"the objective\"\n  rook sessions\n  rook config\n  rook version\n\n")
-	fmt.Fprintf(os.Stderr, "A bare `rook` runs every outstanding objective in .rook/objectives/.\n\nRun `rook --help` for flags.\n")
+	fmt.Fprintf(os.Stderr, "acof - AI bug-hunting harness\n\n")
+	fmt.Fprintf(os.Stderr, "Usage:\n  acof [flags] [objective...]\n  acof new \"the objective\"\n  acof sessions\n  acof config\n  acof version\n\n")
+	fmt.Fprintf(os.Stderr, "A bare `acof` runs every outstanding objective in .acof/objectives/.\n\nRun `acof --help` for flags.\n")
 }
 
 // listSessions prints the session logs from the sessions directory, newest
@@ -673,7 +673,7 @@ func listSessions(args []string) error {
 		fmt.Printf("%-20s %-10s %s\n", e.ID, status, task)
 	}
 
-	fmt.Fprintf(os.Stderr, "\nresume with: rook --resume <id>\n")
+	fmt.Fprintf(os.Stderr, "\nresume with: acof --resume <id>\n")
 
 	return nil
 }

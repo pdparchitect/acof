@@ -1,6 +1,6 @@
 # Binary
-/rook
-/rook.exe
+/acof
+/acof.exe
 
 # Release artifacts
 /dist/
@@ -17,6 +17,6 @@ go.work.sum
 .env
 .env.local
 
-# Rook dossier: objectives are meant to be committed (they are the contract);
+# Acof dossier: objectives are meant to be committed (they are the contract);
 # records are run telemetry and should not be committed.
-.rook/records/
+.acof/records/

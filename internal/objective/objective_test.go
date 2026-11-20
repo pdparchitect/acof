@@ -157,7 +157,7 @@ func TestTaskOfABareObjectiveIsJustTheObjective(t *testing.T) {
 	}
 }
 
-// The scaffold's whole job is to produce a file rook itself will accept.
+// The scaffold's whole job is to produce a file acof itself will accept.
 func TestScaffoldWritesALoadableObjective(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "objectives")
 
@@ -314,12 +314,12 @@ func TestDisplayTitlePrefersTheDeclaredOneThenTheFileName(t *testing.T) {
 	}{
 		{
 			name: "a declared title wins",
-			obj:  Objective{Title: "API audit", Path: "/dossier/.rook/objectives/audit-the-api-handlers.yaml"},
+			obj:  Objective{Title: "API audit", Path: "/dossier/.acof/objectives/audit-the-api-handlers.yaml"},
 			want: "API audit",
 		},
 		{
 			name: "the file name becomes one",
-			obj:  Objective{Path: "/dossier/.rook/objectives/audit-the-flaky-endpoint.yaml"},
+			obj:  Objective{Path: "/dossier/.acof/objectives/audit-the-flaky-endpoint.yaml"},
 			want: "Audit the flaky endpoint",
 		},
 		{
@@ -449,14 +449,14 @@ func TestScaffoldNamesTheFileByTitleWhenThereIsOne(t *testing.T) {
 	dir := t.TempDir()
 
 	titled, err := Scaffold(dir, Objective{
-		Title:     "Interactive rook new",
+		Title:     "Interactive acof new",
 		Objective: "the new command should have an interactive version where I can continuously type new mission briefs that get recorded as objectives",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got := filepath.Base(titled); got != "interactive-rook-new.yaml" {
+	if got := filepath.Base(titled); got != "interactive-acof-new.yaml" {
 		t.Errorf("file name = %q, want it named from the title", got)
 	}
 
@@ -471,7 +471,7 @@ func TestScaffoldNamesTheFileByTitleWhenThereIsOne(t *testing.T) {
 	}
 
 	// and a name already taken is still uniquified rather than overwritten
-	again, err := Scaffold(dir, Objective{Title: "Interactive rook new", Objective: "something else"})
+	again, err := Scaffold(dir, Objective{Title: "Interactive acof new", Objective: "something else"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -480,13 +480,13 @@ func TestScaffoldNamesTheFileByTitleWhenThereIsOne(t *testing.T) {
 		t.Error("scaffolding the same title twice must not overwrite the first")
 	}
 
-	if got := filepath.Base(again); got != "interactive-rook-new-2.yaml" {
+	if got := filepath.Base(again); got != "interactive-acof-new-2.yaml" {
 		t.Errorf("the second file is %q, want it uniquified from the title", got)
 	}
 }
 
 // List returns the objective files directly inside dir, in filename order -
-// the batch a bare `rook` runs. Only the top level is listed, and a missing
+// the batch a bare `acof` runs. Only the top level is listed, and a missing
 // directory is an empty listing rather than an error: a project with no dossier
 // yet simply has no outstanding work.
 func TestListReturnsYAMLInFilenameOrder(t *testing.T) {

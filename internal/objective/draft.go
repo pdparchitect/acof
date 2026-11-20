@@ -87,7 +87,7 @@ func ParseDraft(objective, reply string) (Objective, error) {
 
 	if len(success) == 0 {
 		// the excerpt is what makes this failure debuggable: without it "no
-		// criteria" reads as rook failing, not the model
+		// criteria" reads as acof failing, not the model
 		return Objective{}, fmt.Errorf("draft: the model proposed no success criteria (got %q)", excerpt(reply))
 	}
 

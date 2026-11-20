@@ -1,21 +1,21 @@
 # Configuration
 
-Configuration is layered: **built-in defaults < config file < `ROOK_*` env vars
+Configuration is layered: **built-in defaults < config file < `ACOF_*` env vars
 < CLI flags**. The config file is optional - env vars alone are enough.
 
 ```bash
-rook config        # opens the config in $EDITOR, creating it from a template
-rook config path   # print the config file location
+acof config        # opens the config in $EDITOR, creating it from a template
+acof config path   # print the config file location
 ```
 
-The file lives at `~/.config/rook/config.yaml` (override with `$ROOK_CONFIG` or
-`--config`). Every scalar has a matching `ROOK_*` env var (`agent.model` →
-`ROOK_AGENT_MODEL`, `default_provider` → `ROOK_DEFAULT_PROVIDER`). A provider's
+The file lives at `~/.config/acof/config.yaml` (override with `$ACOF_CONFIG` or
+`--config`). Every scalar has a matching `ACOF_*` env var (`agent.model` →
+`ACOF_AGENT_MODEL`, `default_provider` → `ACOF_DEFAULT_PROVIDER`). A provider's
 key comes from its provider's conventional variable or `api_key` in the file,
 which may be a literal or a `$VAR` reference. A developer build also reads a
 `.env` from the working directory - a released one does not (see
 [development.md](development.md)). See
-[../configs/rook.example.yaml](../configs/rook.example.yaml) for the full,
+[../configs/acof.example.yaml](../configs/acof.example.yaml) for the full,
 commented template.
 
 ## Engine tuning
@@ -38,21 +38,21 @@ A model entry under `providers.<name>.models.<model>` additionally takes:
 - `context` - the real context window, if the endpoint's is smaller than the model's card
 - `vision` - `true` if this model can be shown images (offers the agent the view tool)
 
-Rook cannot import zot's internal model catalogue, so there is no
+Acof cannot import zot's internal model catalogue, so there is no
 auto-detection; these are explicit operator overrides - the part that matters
 for a custom endpoint.
 
 ## Update check
 
-After a run, Rook asks GitHub for the latest release and prints a one-line
+After a run, Acof asks GitHub for the latest release and prints a one-line
 notice (with the upgrade command) when the binary is out of date - the only call
 it makes that is not to the model provider. Disable it on an air-gapped or
 locked-down host with `update_check.disabled: true`, or
-`ROOK_UPDATE_CHECK_DISABLED=true` (no config file needed).
+`ACOF_UPDATE_CHECK_DISABLED=true` (no config file needed).
 
 ## Credential hygiene
 
-Rook strips the resolved provider credential from the environment before the
+Acof strips the resolved provider credential from the environment before the
 agent runs, so the commands it executes against a target cannot read it. Every
 built-in provider's conventional variable is unset by name, whichever provider
 the run uses - so a provider key exported in your shell does not leak into the

@@ -6,7 +6,7 @@
 # only runs in CI is one everyone discovers late. Override with:
 #   COVERAGE_THRESHOLD=80 scripts/coverage.sh
 #
-# The threshold is deliberately below zot's 90%: rook has thin packages (cmd,
+# The threshold is deliberately below zot's 90%: acof has thin packages (cmd,
 # buildinfo, version) that are partly untestable wiring, and the agent package
 # cannot exercise a real model provider in CI. Raise it as coverage grows.
 set -euo pipefail
@@ -24,7 +24,7 @@ output="$(go test ./... -coverprofile="$profile" -covermode=atomic 2>&1)" || {
 	exit 1
 }
 
-echo "$output" | grep -E "coverage:|no test files" | sed 's|github.com/pdparchitect/rook||'
+echo "$output" | grep -E "coverage:|no test files" | sed 's|github.com/pdparchitect/acof||'
 
 total="$(go tool cover -func="$profile" | awk '/^total:/ {print $3}' | tr -d '%')"
 

@@ -103,4 +103,4 @@ jobs:
         run: |
           EXT=""
           if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
-          go build -trimpath -o "rook${EXT}" ./cmd/rook
+          go build -trimpath -o "acof${EXT}" ./cmd/acof

@@ -12,7 +12,7 @@ import (
 )
 
 // NewRunID returns a sortable, per-process run identifier - a UTC timestamp plus
-// the PID - so concurrent Rook runs each get their own run directory and never
+// the PID - so concurrent Acof runs each get their own run directory and never
 // clobber one another's artifacts.
 func NewRunID() string {
 	return time.Now().UTC().Format("20060102-150405") + "-" + strconv.Itoa(os.Getpid())
@@ -66,7 +66,7 @@ func (l *eventLogger) close() {
 }
 
 // Status is the machine-readable snapshot of a run. When a status file is
-// configured, Rook keeps it updated as the run progresses so external consumers
+// configured, Acof keeps it updated as the run progresses so external consumers
 // - the desktop widget in particular - can render live activity without parsing
 // the human-readable event stream.
 type Status struct {

@@ -80,7 +80,7 @@ type Evidence struct {
 // Proven reports whether this evidence shows anything.
 func (e Evidence) Proven() bool { return e.Missing == "" && e.Run != "" }
 
-// ArtifactSummary is the shape of what rook's status.json records at the end of
+// ArtifactSummary is the shape of what acof's status.json records at the end of
 // a run, read back to build evidence without coupling the objective package to
 // the agent package's Status type.
 type ArtifactSummary struct {
@@ -244,8 +244,8 @@ func (l Ledger) Satisfied(o Objective) (Record, bool) {
 
 // ReadArtifactSummary reads back what a run recorded about itself, so the
 // receipt carries proof rather than only a claim. The status.json the run wrote
-// is the only honest source: anything reconstructed here would be rook vouching
-// for rook. A run with no status file yields evidence that says so.
+// is the only honest source: anything reconstructed here would be acof vouching
+// for acof. A run with no status file yields evidence that says so.
 //
 // The status file is the run's own JSON shape (the agent package's Status), read
 // here through a minimal local struct so this package does not depend on the

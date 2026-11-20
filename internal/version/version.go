@@ -1,5 +1,5 @@
 // Package version provides build-time version information and update checking
-// for the rook binary. When the binary is built via `go build` without setting
+// for the acof binary. When the binary is built via `go build` without setting
 // the Version variable, it defaults to "dev" and all update checks are skipped.
 package version
 
@@ -21,7 +21,7 @@ var (
 
 const (
 	// releaseRepo is the GitHub owner/repo used to check for new releases.
-	releaseRepo = "pdparchitect/rook"
+	releaseRepo = "pdparchitect/acof"
 
 	// checkTimeout limits how long the HTTP call to GitHub may take.
 	checkTimeout = 4 * time.Second
@@ -43,7 +43,7 @@ type ghRelease struct {
 }
 
 // LatestRelease queries the GitHub API for the latest published release of
-// the rook repository. Returns the tag name, the release URL, and any error.
+// the acof repository. Returns the tag name, the release URL, and any error.
 func LatestRelease() (tag string, url string, err error) {
 	client := &http.Client{Timeout: checkTimeout}
 
@@ -147,7 +147,7 @@ func Check() (*CheckResult, error) {
 }
 
 // InstallCommand is the one-line installer the update notice recommends. It
-// fetches the installer published as a release asset (rook has no website of
+// fetches the installer published as a release asset (acof has no website of
 // its own), which downloads the latest release for this platform, verifies its
 // checksum and replaces the binary in place - so it doubles as the upgrade
 // command.
@@ -161,7 +161,7 @@ func FormatUpdateNotice(r *CheckResult) string {
 	}
 
 	return fmt.Sprintf(
-		"A new version of rook is available: %s → %s\nUpgrade: %s\nRelease: %s",
+		"A new version of acof is available: %s → %s\nUpgrade: %s\nRelease: %s",
 		r.Current, r.Latest, InstallCommand, r.UpdateURL,
 	)
 }
