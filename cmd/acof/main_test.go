@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pdparchitect/rook/internal/config"
-	"github.com/pdparchitect/rook/internal/objective"
-	"github.com/pdparchitect/rook/internal/version"
+	"github.com/pdparchitect/acof/internal/config"
+	"github.com/pdparchitect/acof/internal/objective"
+	"github.com/pdparchitect/acof/internal/version"
 )
 
 // firstNonEmpty returns the first trimmed value that is not empty, so a flag
@@ -35,9 +35,9 @@ func TestFirstNonEmpty(t *testing.T) {
 // expandPath expands $ENV references and a leading ~. A path with no references
 // comes back unchanged.
 func TestExpandPath(t *testing.T) {
-	t.Setenv("ROOK_TEST_VAR", "expanded")
+	t.Setenv("ACOF_TEST_VAR", "expanded")
 
-	if got := expandPath("$ROOK_TEST_VAR/sub"); got != "expanded/sub" {
+	if got := expandPath("$ACOF_TEST_VAR/sub"); got != "expanded/sub" {
 		t.Errorf("env expansion = %q, want expanded/sub", got)
 	}
 
@@ -90,7 +90,7 @@ func TestFlagsUsageDescribesTheRealCommands(t *testing.T) {
 
 	text := b.String()
 
-	for _, want := range []string{"rook [flags]", "rook new", "rook config", "rook version"} {
+	for _, want := range []string{"acof [flags]", "acof new", "acof config", "acof version"} {
 		if !strings.Contains(text, want) {
 			t.Errorf("usage does not mention %q:\n%s", want, text)
 		}
@@ -149,8 +149,8 @@ func TestResolveObjectivesTeachesProseTypers(t *testing.T) {
 		t.Fatal("prose must not resolve")
 	}
 
-	if !strings.Contains(err.Error(), "rook new") {
-		t.Errorf("the error should point at `rook new`: %v", err)
+	if !strings.Contains(err.Error(), "acof new") {
+		t.Errorf("the error should point at `acof new`: %v", err)
 	}
 }
 
@@ -205,7 +205,7 @@ func TestResolveObjectivesListsFromDirectory(t *testing.T) {
 	}
 }
 
-// `rook new` writes an objective rook itself will run.
+// `acof new` writes an objective acof itself will run.
 func TestNewObjectiveScaffoldsARunnableObjective(t *testing.T) {
 	t.Chdir(t.TempDir())
 
@@ -231,7 +231,7 @@ func TestNewObjectiveScaffoldsARunnableObjective(t *testing.T) {
 	}
 }
 
-// Bare `rook new` scaffolds the blank form: a file to fill in, which refuses to
+// Bare `acof new` scaffolds the blank form: a file to fill in, which refuses to
 // parse until it is.
 func TestNewObjectiveScaffoldsTheBlankForm(t *testing.T) {
 	t.Chdir(t.TempDir())
@@ -252,7 +252,7 @@ func TestNewObjectiveScaffoldsTheBlankForm(t *testing.T) {
 	}
 }
 
-// `rook new` with --objectives-dir files the objective there instead of the
+// `acof new` with --objectives-dir files the objective there instead of the
 // default dossier.
 func TestNewObjectiveWithObjectivesDir(t *testing.T) {
 	t.Chdir(t.TempDir())
@@ -317,10 +317,10 @@ func TestPrintVersion(t *testing.T) {
 	}
 }
 
-// `rook config path` prints the resolved config path and exits, without needing
+// `acof config path` prints the resolved config path and exits, without needing
 // a provider or a config file.
 func TestRunConfigPath(t *testing.T) {
-	t.Setenv("ROOK_CONFIG", "/tmp/rook-test-config.yaml")
+	t.Setenv("ACOF_CONFIG", "/tmp/acof-test-config.yaml")
 
 	origArgs := os.Args
 	origStdout := os.Stdout
@@ -329,7 +329,7 @@ func TestRunConfigPath(t *testing.T) {
 		os.Stdout = origStdout
 	}()
 
-	os.Args = []string{"rook", "config", "path"}
+	os.Args = []string{"acof", "config", "path"}
 
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -351,19 +351,19 @@ func TestRunConfigPath(t *testing.T) {
 		}
 	}
 
-	if !strings.Contains(b.String(), "/tmp/rook-test-config.yaml") {
+	if !strings.Contains(b.String(), "/tmp/acof-test-config.yaml") {
 		t.Errorf("config path output should contain the path, got: %q", b.String())
 	}
 }
 
-// `rook version` as a subcommand prints the version line.
+// `acof version` as a subcommand prints the version line.
 func TestRunVersionSubcommand(t *testing.T) {
 	version.Version = "v0.6.0-test"
 	defer func() { version.Version = "dev" }()
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "version"}
+	os.Args = []string{"acof", "version"}
 
 	// Swallow stderr (notifyUpdate writes there) and capture stdout.
 	origStderr := os.Stderr
@@ -402,7 +402,7 @@ func TestRunVersionSubcommand(t *testing.T) {
 // the path and returns an error.
 func TestEditConfigSeedsTemplateAndErrorsWithoutEditor(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	t.Setenv("ROOK_CONFIG", configPath)
+	t.Setenv("ACOF_CONFIG", configPath)
 	t.Setenv("VISUAL", "")
 	t.Setenv("EDITOR", "")
 
@@ -433,7 +433,7 @@ func TestEditConfigSeedsTemplateAndErrorsWithoutEditor(t *testing.T) {
 	}
 }
 
-// `rook new` with --dir scaffolds into that directory's dossier.
+// `acof new` with --dir scaffolds into that directory's dossier.
 func TestNewObjectiveWithDirScaffoldsIntoThatDir(t *testing.T) {
 	target := t.TempDir()
 	t.Chdir(t.TempDir())
@@ -464,13 +464,13 @@ func TestDefaultSessionDir(t *testing.T) {
 	}
 }
 
-// `rook sessions` with no sessions prints a message and exits cleanly.
+// `acof sessions` with no sessions prints a message and exits cleanly.
 func TestRunSessionsEmpty(t *testing.T) {
 	dir := t.TempDir()
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "sessions", "--dir", dir}
+	os.Args = []string{"acof", "sessions", "--dir", dir}
 
 	origStderr := os.Stderr
 	r, w, _ := os.Pipe()
@@ -499,7 +499,7 @@ func TestRunSessionsEmpty(t *testing.T) {
 	}
 }
 
-// `rook sessions` lists sessions from the directory.
+// `acof sessions` lists sessions from the directory.
 func TestRunSessionsListsEntries(t *testing.T) {
 	dir := t.TempDir()
 
@@ -514,7 +514,7 @@ func TestRunSessionsListsEntries(t *testing.T) {
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "sessions", "--dir", dir}
+	os.Args = []string{"acof", "sessions", "--dir", dir}
 
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
@@ -548,14 +548,14 @@ func TestRunSessionsListsEntries(t *testing.T) {
 	}
 }
 
-// `rook --resume last` with no sessions is an error.
+// `acof --resume last` with no sessions is an error.
 func TestRunResumeNoSessions(t *testing.T) {
 	dir := t.TempDir()
 	t.Chdir(t.TempDir())
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "--resume", "last", "--session-dir", dir}
+	os.Args = []string{"acof", "--resume", "last", "--session-dir", dir}
 
 	// Swallow stderr.
 	origStderr := os.Stderr
@@ -569,14 +569,14 @@ func TestRunResumeNoSessions(t *testing.T) {
 	}
 }
 
-// `rook --version` (the flag) prints the version and exits.
+// `acof --version` (the flag) prints the version and exits.
 func TestRunVersionFlag(t *testing.T) {
 	version.Version = "v0.6.0-test"
 	defer func() { version.Version = "dev" }()
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "--version"}
+	os.Args = []string{"acof", "--version"}
 
 	// Swallow stderr (notifyUpdate).
 	origStderr := os.Stderr
@@ -611,7 +611,7 @@ func TestRunVersionFlag(t *testing.T) {
 func TestRunBadConfigErrors(t *testing.T) {
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "--config", filepath.Join(t.TempDir(), "nope.yaml")}
+	os.Args = []string{"acof", "--config", filepath.Join(t.TempDir(), "nope.yaml")}
 
 	// Swallow stderr.
 	origStderr := os.Stderr
@@ -641,7 +641,7 @@ func TestRunNoObjectivesErrors(t *testing.T) {
 	}()
 
 	// Provide a config so the provider resolves, then fail on objectives.
-	// Actually, a bare `rook` with no config file and no API key will fail at
+	// Actually, a bare `acof` with no config file and no API key will fail at
 	// cfg.Validate or cfg.Selected first. We want the "no objectives" error,
 	// so provide a valid config.
 	configDir := t.TempDir()
@@ -650,7 +650,7 @@ func TestRunNoObjectivesErrors(t *testing.T) {
 
 	origArgs := os.Args
 	defer func() { os.Args = origArgs }()
-	os.Args = []string{"rook", "--config", configPath}
+	os.Args = []string{"acof", "--config", configPath}
 
 	err := run()
 	if err == nil {
@@ -658,7 +658,7 @@ func TestRunNoObjectivesErrors(t *testing.T) {
 	}
 }
 
-// `rook new` with a parse error (bad flag) returns the error.
+// `acof new` with a parse error (bad flag) returns the error.
 func TestNewObjectiveBadFlag(t *testing.T) {
 	var out strings.Builder
 	if err := newObjective([]string{"--nonexistent"}, &out); err == nil {
@@ -666,7 +666,7 @@ func TestNewObjectiveBadFlag(t *testing.T) {
 	}
 }
 
-// `rook new` with --objectives-dir and --dir both set uses --objectives-dir.
+// `acof new` with --objectives-dir and --dir both set uses --objectives-dir.
 func TestNewObjectiveWithDirAndObjectivesDir(t *testing.T) {
 	t.Chdir(t.TempDir())
 
@@ -686,17 +686,17 @@ func TestNewObjectiveWithDirAndObjectivesDir(t *testing.T) {
 }
 
 // updateCheckDisabledByEnv reads the env-only opt-out with strconv.ParseBool
-// semantics, so `rook version` (which loads no config) can still be silenced.
+// semantics, so `acof version` (which loads no config) can still be silenced.
 func TestUpdateCheckDisabledByEnv(t *testing.T) {
 	cases := map[string]bool{"": false, "true": true, "1": true, "false": false, "0": false, "yes": false}
 	for value, want := range cases {
 		if value == "" {
-			os.Unsetenv("ROOK_UPDATE_CHECK_DISABLED")
+			os.Unsetenv("ACOF_UPDATE_CHECK_DISABLED")
 		} else {
-			t.Setenv("ROOK_UPDATE_CHECK_DISABLED", value)
+			t.Setenv("ACOF_UPDATE_CHECK_DISABLED", value)
 		}
 		if got := updateCheckDisabledByEnv(); got != want {
-			t.Errorf("ROOK_UPDATE_CHECK_DISABLED=%q -> %v, want %v", value, got, want)
+			t.Errorf("ACOF_UPDATE_CHECK_DISABLED=%q -> %v, want %v", value, got, want)
 		}
 	}
 }

@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-// applyEnv overrides scalar config fields from ROOK_* environment variables,
+// applyEnv overrides scalar config fields from ACOF_* environment variables,
 // where the variable name is the field's yaml path upper-cased with dots as
-// underscores (e.g. agent.model -> ROOK_AGENT_MODEL, default_provider ->
-// ROOK_DEFAULT_PROVIDER). Provider credentials are not set this way; they come
+// underscores (e.g. agent.model -> ACOF_AGENT_MODEL, default_provider ->
+// ACOF_DEFAULT_PROVIDER). Provider credentials are not set this way; they come
 // from each provider's own environment variable (see builtinProviders).
 func applyEnv(cfg *Config) error {
-	return applyEnvStruct(reflect.ValueOf(cfg).Elem(), "ROOK")
+	return applyEnvStruct(reflect.ValueOf(cfg).Elem(), "ACOF")
 }
 
 func applyEnvStruct(v reflect.Value, prefix string) error {

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-rook is an autonomous offensive-security agent in a single Go binary. It wraps
+acof is an autonomous offensive-security agent in a single Go binary. It wraps
 the zot engine (loop, thread assembly, compaction, provider transports,
 tokenizer, session logs) and the `tui/` viewer, and ships lean: the only
 embedded skill is a catalog pointing the agent at external skill collections it

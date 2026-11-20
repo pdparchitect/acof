@@ -29,7 +29,7 @@ func isolate(t *testing.T) {
 	t.Helper()
 
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("ROOK_CONFIG", "")
+	t.Setenv("ACOF_CONFIG", "")
 
 	for name := range builtinProviders {
 		if env := builtinProviders[name].secretEnv; env != "" {
@@ -78,7 +78,7 @@ func TestTheDefaultPairAgrees(t *testing.T) {
 	}
 }
 
-// The built-in providers are exactly the providers Rook speaks to. Pinning the
+// The built-in providers are exactly the providers Acof speaks to. Pinning the
 // whole set catches an accidental addition and an accidental removal with one
 // assertion.
 func TestBuiltinProvidersAreExactlyTheDrivers(t *testing.T) {
@@ -248,13 +248,13 @@ providers:
 // rather than sending the literal text "$MY_KEY" to the provider.
 func TestAnUnsetEnvReferenceResolvesToNothing(t *testing.T) {
 	isolate(t)
-	t.Setenv("ROOK_TEST_UNSET", "")
+	t.Setenv("ACOF_TEST_UNSET", "")
 
 	path := writeConfig(t, `
 default_provider: openai
 providers:
   openai:
-    api_key: '$ROOK_TEST_UNSET'
+    api_key: '$ACOF_TEST_UNSET'
 `)
 
 	cfg, err := Load(path)
@@ -279,8 +279,8 @@ agent:
 default_provider: openai
 `)
 
-	t.Setenv("ROOK_AGENT_MODEL", "from-env")
-	t.Setenv("ROOK_DEFAULT_PROVIDER", "groq")
+	t.Setenv("ACOF_AGENT_MODEL", "from-env")
+	t.Setenv("ACOF_DEFAULT_PROVIDER", "groq")
 
 	cfg, err := Load(path)
 	if err != nil {
@@ -353,7 +353,7 @@ func TestScrubProviderSecrets(t *testing.T) {
 	isolate(t)
 	t.Setenv("ZAI_API_KEY", "sk-zai")
 	t.Setenv("OPENAI_API_KEY", "sk-openai")
-	t.Setenv("ROOK_TEST_UNRELATED", "keep-me")
+	t.Setenv("ACOF_TEST_UNRELATED", "keep-me")
 
 	path := writeConfig(t, `
 default_provider: zai
@@ -380,7 +380,7 @@ providers:
 		t.Errorf("the per-model key survived scrubbing: %q", got)
 	}
 
-	if got := os.Getenv("ROOK_TEST_UNRELATED"); got != "keep-me" {
+	if got := os.Getenv("ACOF_TEST_UNRELATED"); got != "keep-me" {
 		t.Errorf("an unrelated variable was scrubbed: %q", got)
 	}
 
@@ -451,24 +451,24 @@ func TestSecretEnvName(t *testing.T) {
 	}
 }
 
-// DefaultConfigPath honours $ROOK_CONFIG, then XDG_CONFIG_HOME, then falls back
-// to ~/.config/rook/config.yaml.
+// DefaultConfigPath honours $ACOF_CONFIG, then XDG_CONFIG_HOME, then falls back
+// to ~/.config/acof/config.yaml.
 func TestDefaultConfigPath(t *testing.T) {
-	t.Setenv("ROOK_CONFIG", "/custom/path/config.yaml")
+	t.Setenv("ACOF_CONFIG", "/custom/path/config.yaml")
 	if got := DefaultConfigPath(); got != "/custom/path/config.yaml" {
-		t.Errorf("ROOK_CONFIG override = %q", got)
+		t.Errorf("ACOF_CONFIG override = %q", got)
 	}
 
-	t.Setenv("ROOK_CONFIG", "")
+	t.Setenv("ACOF_CONFIG", "")
 	t.Setenv("XDG_CONFIG_HOME", "/xdg")
-	if got := DefaultConfigPath(); got != "/xdg/rook/config.yaml" {
+	if got := DefaultConfigPath(); got != "/xdg/acof/config.yaml" {
 		t.Errorf("XDG_CONFIG_HOME path = %q", got)
 	}
 
 	t.Setenv("XDG_CONFIG_HOME", "")
 	home := os.Getenv("HOME")
 	if home != "" {
-		want := filepath.Join(home, ".config", "rook", "config.yaml")
+		want := filepath.Join(home, ".config", "acof", "config.yaml")
 		if got := DefaultConfigPath(); got != want {
 			t.Errorf("default path = %q, want %q", got, want)
 		}
@@ -476,46 +476,46 @@ func TestDefaultConfigPath(t *testing.T) {
 }
 
 // DefaultRunDir honours $XDG_STATE_HOME, then falls back to
-// ~/.local/state/rook/runs.
+// ~/.local/state/acof/runs.
 func TestDefaultRunDir(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", "/xdg-state")
-	if got := DefaultRunDir(); got != "/xdg-state/rook/runs" {
+	if got := DefaultRunDir(); got != "/xdg-state/acof/runs" {
 		t.Errorf("XDG_STATE_HOME path = %q", got)
 	}
 
 	t.Setenv("XDG_STATE_HOME", "")
 	home := os.Getenv("HOME")
 	if home != "" {
-		want := filepath.Join(home, ".local", "state", "rook", "runs")
+		want := filepath.Join(home, ".local", "state", "acof", "runs")
 		if got := DefaultRunDir(); got != want {
 			t.Errorf("default run dir = %q, want %q", got, want)
 		}
 	}
 }
 
-// A bad integer in a ROOK_* env var is reported with the variable name, so the
+// A bad integer in a ACOF_* env var is reported with the variable name, so the
 // operator can find the misconfiguration.
 func TestApplyEnvRejectsBadIntegers(t *testing.T) {
 	isolate(t)
 
 	path := writeConfig(t, "default_provider: zai\n")
 	t.Setenv("ZAI_API_KEY", "sk-zai")
-	t.Setenv("ROOK_AGENT_MAX_ITERATIONS", "not-a-number")
+	t.Setenv("ACOF_AGENT_MAX_ITERATIONS", "not-a-number")
 
 	if _, err := Load(path); err == nil {
-		t.Error("a non-integer ROOK_AGENT_MAX_ITERATIONS must be rejected")
+		t.Error("a non-integer ACOF_AGENT_MAX_ITERATIONS must be rejected")
 	}
 }
 
 // resolveSecret expands $VAR and ${VAR}, and returns a literal unchanged.
 func TestResolveSecret(t *testing.T) {
-	t.Setenv("ROOK_TEST_SECRET", "expanded")
+	t.Setenv("ACOF_TEST_SECRET", "expanded")
 
-	if got := resolveSecret("$ROOK_TEST_SECRET"); got != "expanded" {
+	if got := resolveSecret("$ACOF_TEST_SECRET"); got != "expanded" {
 		t.Errorf("dollar reference = %q", got)
 	}
 
-	if got := resolveSecret("${ROOK_TEST_SECRET}"); got != "expanded" {
+	if got := resolveSecret("${ACOF_TEST_SECRET}"); got != "expanded" {
 		t.Errorf("braced reference = %q", got)
 	}
 
@@ -523,12 +523,12 @@ func TestResolveSecret(t *testing.T) {
 		t.Errorf("literal = %q", got)
 	}
 
-	if got := resolveSecret("  $ROOK_TEST_SECRET  "); got != "expanded" {
+	if got := resolveSecret("  $ACOF_TEST_SECRET  "); got != "expanded" {
 		t.Errorf("trimmed reference = %q", got)
 	}
 
-	t.Setenv("ROOK_TEST_SECRET", "")
-	if got := resolveSecret("$ROOK_TEST_SECRET"); got != "" {
+	t.Setenv("ACOF_TEST_SECRET", "")
+	if got := resolveSecret("$ACOF_TEST_SECRET"); got != "" {
 		t.Errorf("unset reference = %q, want empty", got)
 	}
 }
@@ -579,11 +579,11 @@ func TestSetScalar(t *testing.T) {
 // ParseDraft extracts the objective and proposed title from a model's free-text
 // response. Covered here to lock the contract.
 func TestConfigPathHomeFallback(t *testing.T) {
-	t.Setenv("ROOK_CONFIG", "")
+	t.Setenv("ACOF_CONFIG", "")
 	t.Setenv("XDG_CONFIG_HOME", "")
-	t.Setenv("HOME", "/tmp/rook-test-home")
+	t.Setenv("HOME", "/tmp/acof-test-home")
 
-	if got := DefaultConfigPath(); got != "/tmp/rook-test-home/.config/rook/config.yaml" {
+	if got := DefaultConfigPath(); got != "/tmp/acof-test-home/.config/acof/config.yaml" {
 		t.Errorf("home fallback = %q", got)
 	}
 }

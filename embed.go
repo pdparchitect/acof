@@ -1,10 +1,10 @@
-// Package rook bundles Rook's built-in skill catalog into the executable. The
+// Package acof bundles Acof's built-in skill catalog into the executable. The
 // binary ships lean: the only embedded skill is a catalog that tells the agent
 // where external skill collections live and how to fetch them into the local
 // skills directory. Substantive skills are not compiled in - they are cloned on
 // demand and loaded from disk, so the collection can grow and change without a
-// rook release.
-package rook
+// acof release.
+package acof
 
 import "embed"
 
@@ -18,7 +18,7 @@ import "embed"
 var SkillsFS embed.FS
 
 // ExampleConfigYAML is the commented starter config baked into the binary, used
-// by `rook config` to seed ~/.config/rook/config.yaml when it does not exist yet.
+// by `acof config` to seed ~/.config/acof/config.yaml when it does not exist yet.
 //
-//go:embed configs/rook.example.yaml
+//go:embed configs/acof.example.yaml
 var ExampleConfigYAML []byte

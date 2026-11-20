@@ -105,11 +105,11 @@ func TestFormatUpdateNotice(t *testing.T) {
 	r = &CheckResult{
 		Current:   "v0.1.0",
 		Latest:    "v0.2.0",
-		UpdateURL: "https://github.com/pdparchitect/rook/releases/tag/v0.2.0",
+		UpdateURL: "https://github.com/pdparchitect/acof/releases/tag/v0.2.0",
 		Outdated:  true,
 	}
 	notice := FormatUpdateNotice(r)
-	for _, want := range []string{"v0.1.0", "v0.2.0", "https://github.com/pdparchitect/rook", InstallCommand} {
+	for _, want := range []string{"v0.1.0", "v0.2.0", "https://github.com/pdparchitect/acof", InstallCommand} {
 		if !strings.Contains(notice, want) {
 			t.Errorf("notice should contain %q, got: %q", want, notice)
 		}
@@ -129,7 +129,7 @@ func TestInstallCommandPointsAtReleaseAsset(t *testing.T) {
 func TestLatestReleaseParsesTag(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/vnd.github+json")
-		fmt.Fprint(w, `{"tag_name":"v0.7.0","html_url":"https://github.com/pdparchitect/rook/releases/tag/v0.7.0"}`)
+		fmt.Fprint(w, `{"tag_name":"v0.7.0","html_url":"https://github.com/pdparchitect/acof/releases/tag/v0.7.0"}`)
 	}))
 	defer server.Close()
 
@@ -146,7 +146,7 @@ func TestLatestReleaseParsesTag(t *testing.T) {
 		t.Errorf("tag = %q, want v0.7.0", tag)
 	}
 
-	if url != "https://github.com/pdparchitect/rook/releases/tag/v0.7.0" {
+	if url != "https://github.com/pdparchitect/acof/releases/tag/v0.7.0" {
 		t.Errorf("url = %q", url)
 	}
 }
@@ -188,7 +188,7 @@ func TestLatestReleaseRejectsBadJSON(t *testing.T) {
 func TestCheckReportsOutdated(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/vnd.github+json")
-		fmt.Fprint(w, `{"tag_name":"v0.7.0","html_url":"https://github.com/pdparchitect/rook/releases/tag/v0.7.0"}`)
+		fmt.Fprint(w, `{"tag_name":"v0.7.0","html_url":"https://github.com/pdparchitect/acof/releases/tag/v0.7.0"}`)
 	}))
 	defer server.Close()
 
@@ -221,7 +221,7 @@ func TestCheckReportsOutdated(t *testing.T) {
 func TestCheckReportsCurrent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/vnd.github+json")
-		fmt.Fprint(w, `{"tag_name":"v0.6.0","html_url":"https://github.com/pdparchitect/rook/releases/tag/v0.6.0"}`)
+		fmt.Fprint(w, `{"tag_name":"v0.6.0","html_url":"https://github.com/pdparchitect/acof/releases/tag/v0.6.0"}`)
 	}))
 	defer server.Close()
 

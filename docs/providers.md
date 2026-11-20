@@ -1,6 +1,6 @@
 # Providers
 
-A run targets a **provider** - the model provider Rook talks to. Rook speaks to
+A run targets a **provider** - the model provider Acof talks to. Acof speaks to
 each one directly over the OpenAI-compatible API; there is no gateway and no
 account in between, so all you need is a provider key. Pick a provider with
 `--provider`, or set `default_provider` in config.
@@ -21,7 +21,7 @@ account in between, so all you need is a provider key. Pick a provider with
 | `qwen`       | DashScope compatible mode        | `DASHSCOPE_API_KEY`  |
 | `ollama`     | `http://localhost:11434/v1`      | none (local)         |
 
-Rook defaults to **`zai`** running **`glm-5.2`** - a strong open model for
+Acof defaults to **`zai`** running **`glm-5.2`** - a strong open model for
 bug-hunting work: large context for reading codebases, and permissive for
 offensive tasks. The model must be one the chosen provider serves.
 
@@ -29,24 +29,24 @@ The common case is one exported variable and nothing else:
 
 ```bash
 export ZAI_API_KEY="sk-..."
-rook new "Reverse engineer ./firmware.bin and identify remotely reachable bugs"
-# edit .rook/objectives/reverse-engineer-firmware-bin-and-identify-.yaml
+acof new "Reverse engineer ./firmware.bin and identify remotely reachable bugs"
+# edit .acof/objectives/reverse-engineer-firmware-bin-and-identify-.yaml
 # to set the success criteria, then:
-rook
+acof
 ```
 
 Switch provider with a flag:
 
 ```bash
 export OPENAI_API_KEY="sk-..."
-rook --provider openai --model gpt-5 "…"
+acof --provider openai --model gpt-5 "…"
 ```
 
 For sensitive material that must not leave the machine, a local model is the
 right choice - and the one provider that never sends data off-host:
 
 ```bash
-rook --provider ollama --model llama-4 "…"
+acof --provider ollama --model llama-4 "…"
 ```
 
 ## Any other provider

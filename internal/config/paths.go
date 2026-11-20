@@ -6,49 +6,49 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pdparchitect/rook/internal/objective"
+	"github.com/pdparchitect/acof/internal/objective"
 )
 
 // DefaultConfigPath returns the resolved config file path using a fallback
 // chain:
 //
-//  1. $ROOK_CONFIG environment variable (if set and non-empty)
-//  2. $XDG_CONFIG_HOME/rook/config.yaml (if XDG_CONFIG_HOME is set)
-//  3. ~/.config/rook/config.yaml
+//  1. $ACOF_CONFIG environment variable (if set and non-empty)
+//  2. $XDG_CONFIG_HOME/acof/config.yaml (if XDG_CONFIG_HOME is set)
+//  3. ~/.config/acof/config.yaml
 func DefaultConfigPath() string {
-	if envPath := strings.TrimSpace(os.Getenv("ROOK_CONFIG")); envPath != "" {
+	if envPath := strings.TrimSpace(os.Getenv("ACOF_CONFIG")); envPath != "" {
 		return envPath
 	}
 
-	return filepath.Join(xdgConfigHome(), "rook", "config.yaml")
+	return filepath.Join(xdgConfigHome(), "acof", "config.yaml")
 }
 
 // SkillsDir returns the directory where on-disk skills live, layered over the
-// embedded set: $XDG_CONFIG_HOME/rook/skills or ~/.config/rook/skills. The
+// embedded set: $XDG_CONFIG_HOME/acof/skills or ~/.config/acof/skills. The
 // runner rescans it every iteration, so a skill placed here - by the operator,
 // or by the agent itself cloning a collection mid-run - surfaces on the
 // agent's next turn without a restart.
 func SkillsDir() string {
-	return filepath.Join(xdgConfigHome(), "rook", "skills")
+	return filepath.Join(xdgConfigHome(), "acof", "skills")
 }
 
 // DefaultRunDir returns the base directory for per-run artifacts:
 //
-//  1. $XDG_STATE_HOME/rook/runs (if XDG_STATE_HOME is set)
-//  2. ~/.local/state/rook/runs
+//  1. $XDG_STATE_HOME/acof/runs (if XDG_STATE_HOME is set)
+//  2. ~/.local/state/acof/runs
 func DefaultRunDir() string {
-	return filepath.Join(xdgStateHome(), "rook", "runs")
+	return filepath.Join(xdgStateHome(), "acof", "runs")
 }
 
 // DefaultSessionDir returns the directory where session logs are written, so a
 // run can be inspected afterwards and resumed. Mirrors zot's session directory:
-// project-local under .rook/sessions by default, so a project's sessions stay
+// project-local under .acof/sessions by default, so a project's sessions stay
 // with its objectives and records. An absolute --session-dir overrides it.
 func DefaultSessionDir() string {
 	return filepath.Join(objectiveDossierDir(), "sessions")
 }
 
-// objectiveDossierDir returns the .rook directory under the current working
+// objectiveDossierDir returns the .acof directory under the current working
 // directory, the per-project home for objectives, records, and sessions.
 func objectiveDossierDir() string {
 	return filepath.Join(".", objective.DossierDir)
@@ -74,5 +74,5 @@ func homeDir() string {
 	}
 
 	// Fallback for unusual environments.
-	return "/tmp/rook-" + strconv.Itoa(os.Getuid())
+	return "/tmp/acof-" + strconv.Itoa(os.Getuid())
 }

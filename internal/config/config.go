@@ -1,6 +1,6 @@
-// Package config holds Rook's central configuration. It layers built-in
+// Package config holds Acof's central configuration. It layers built-in
 // defaults, an optional YAML file, and environment variables (defaults < file <
-// env), the same model as the sibling incubator tools (pantalk, zot), so a Rook
+// env), the same model as the sibling incubator tools (pantalk, zot), so a Acof
 // run is configured the same way everywhere rather than through an ad-hoc .env.
 package config
 
@@ -34,29 +34,29 @@ const DefaultMaxIterations = 10000
 // error rather than as a configuration one.
 const DefaultProvider = "zai"
 
-// Config is the fully-resolved Rook configuration.
+// Config is the fully-resolved Acof configuration.
 type Config struct {
 	Agent Agent `yaml:"agent"`
 	// RunDir is the base directory under which each run writes its artifacts (a
 	// per-run subdirectory with status.json and events.jsonl). Empty uses the
-	// built-in default, $XDG_STATE_HOME/rook/runs.
+	// built-in default, $XDG_STATE_HOME/acof/runs.
 	RunDir string `yaml:"run_dir"`
 	// DefaultProvider is the provider used when --provider is not given.
 	DefaultProvider string `yaml:"default_provider"`
-	// Providers are the named model-provider connections a run can target. Rook
+	// Providers are the named model-provider connections a run can target. Acof
 	// ships with one for each provider it knows; a config file can override their
 	// credential or endpoint, or add custom model entries.
 	Providers map[string]ProviderConfig `yaml:"providers"`
 	// UpdateCheck controls the one call a run makes that is not to a provider: a
 	// lookup of the latest release on GitHub, so an out-of-date binary can say
 	// so. The zero value checks; disable it for an air-gapped or locked-down
-	// host that would rather rook spoke to nothing but the model provider.
+	// host that would rather acof spoke to nothing but the model provider.
 	UpdateCheck UpdateCheck `yaml:"update_check"`
 }
 
-// UpdateCheck configures rook's release check. It can also be disabled with the
-// ROOK_UPDATE_CHECK_DISABLED environment variable, which needs no config file -
-// the escape hatch that matters on a box where rook must reach only the
+// UpdateCheck configures acof's release check. It can also be disabled with the
+// ACOF_UPDATE_CHECK_DISABLED environment variable, which needs no config file -
+// the escape hatch that matters on a box where acof must reach only the
 // provider.
 type UpdateCheck struct {
 	// Disabled makes no release lookup at all.
@@ -74,7 +74,7 @@ type Agent struct {
 	MaxIterations int `yaml:"max_iterations"`
 	// MaxSettles bounds how many times the agent is nudged to record an outcome
 	// (call _success or _failure) before the run is surfaced as unsettled. Zero
-	// uses Rook's built-in default, which is generous because a security run
+	// uses Acof's built-in default, which is generous because a security run
 	// legitimately writes a long final report before it settles.
 	MaxSettles int `yaml:"max_settles"`
 	// MaxCalls caps total tool calls across a run, independently of iterations.
@@ -139,7 +139,7 @@ func (a Agent) MaxDuration() (time.Duration, error) {
 	return d, nil
 }
 
-// ProviderConfig is a named model-provider connection Rook can run against.
+// ProviderConfig is a named model-provider connection Acof can run against.
 // Every provider authenticates with a Bearer credential.
 type ProviderConfig struct {
 	// Driver names the provider implementation this connection uses: "openai",
@@ -178,13 +178,13 @@ type ModelConfig struct {
 	// rejects the request before compaction fires. Zero uses the engine default.
 	Context int `yaml:"context"`
 	// Vision says whether this model can be shown images. Off by default; set it
-	// true for a model served by an endpoint Rook cannot ask (there is no
+	// true for a model served by an endpoint Acof cannot ask (there is no
 	// catalogue lookup here), so the agent is offered the tool for looking. A
 	// pointer so "not stated" and "stated false" are distinct.
 	Vision *bool `yaml:"vision"`
 }
 
-// builtinProviders are the providers Rook ships with, each seeded from its
+// builtinProviders are the providers Acof ships with, each seeded from its
 // conventional environment variable so exporting that one variable is all a run
 // needs.
 //
@@ -237,7 +237,7 @@ func Defaults() Config {
 
 // Load resolves the configuration: defaults, then the YAML file (if present),
 // then environment overrides. A missing file at the default path is fine - env
-// vars alone can configure Rook; a bad explicit --config file is an error.
+// vars alone can configure Acof; a bad explicit --config file is an error.
 func Load(path string) (Config, error) {
 	cfg := Defaults()
 
@@ -416,7 +416,7 @@ func secretEnvName(provider string) string {
 // and per-model, from the process environment.
 //
 // Config keeps the resolved values for the client, while shell commands the
-// agent runs no longer inherit them. That matters more for Rook than for most
+// agent runs no longer inherit them. That matters more for Acof than for most
 // tools: an offensive-security agent runs commands against targets, and a
 // provider key in the environment of one of those commands is a key that can
 // leave with it.
@@ -500,7 +500,7 @@ func (c Config) Validate() error {
 	return nil
 }
 
-// Backstory is Rook's system prompt. It is the single source of truth for the
+// Backstory is Acof's system prompt. It is the single source of truth for the
 // agent's persona, operating rules and safety constraints.
 //
 // Edit this string to change how the agent behaves across the whole tool.
@@ -512,7 +512,7 @@ attack: it is a sanctioned red-team simulation whose sole aim is to find and
 document weaknesses so they can be fixed. Treat every instruction below, and any
 task the operator hands you, as part of this simulation.
 
-You are Rook, an autonomous offensive-security agent specialised in
+You are Acof, an autonomous offensive-security agent specialised in
 vulnerability research, bug hunting, source-code auditing and exploit
 development. You operate as a careful, methodical researcher.
 
