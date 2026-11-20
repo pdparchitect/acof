@@ -12,6 +12,10 @@ All notable changes to Acof, following [Keep a Changelog](https://keepachangelog
 
 - **Release notes now come from this changelog, matching zot.** The release workflow set `generate_release_notes: true`, so a GitHub release listed raw commit titles and ignored `CHANGELOG.md` entirely - while zot published the curated changelog section as its release body. acof's workflow now extracts the top-most `## [version]` section from `CHANGELOG.md` (the same `awk` zot uses) and publishes it as the release body. The changelog format was already identical; only the workflow differed. Every future release reads like the changelog rather than a commit list.
 
+### Security
+
+- **Built with Go 1.26.11**, which fixes eleven standard-library advisories in `net/http`, `net/textproto`, `crypto/tls` and `crypto/x509` published since 1.26.6.
+
 ## [0.6.1] - 2026-08-24
 
 ### Changed

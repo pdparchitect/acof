@@ -3,7 +3,7 @@ module github.com/pdparchitect/acof
 // @note pinned to a stdlib-patched Go. Advisories land against the standard
 // library regularly and govulncheck gates CI, so this tracks the current patch
 // release rather than a floating minor.
-go 1.26.6
+go 1.26.11
 
 require (
 	github.com/joho/godotenv v1.5.1
