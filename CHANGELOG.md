@@ -2,9 +2,11 @@
 
 All notable changes to Acof, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/).
 
-## [0.6.2] - unreleased
+## [0.7.0] - 2026-11-20
 
 ### Changed
+
+- **Rook is now acof.** The tool, its binary and everything it reads take the new name: the command is `acof`, objectives and the ledger live under `.acof/`, the config under `~/.config/acof/`, and every `ROOK_*` environment variable is now `ACOF_*` (`ACOF_CONFIG`, `ACOF_AGENT_MODEL`, `ACOF_DEFAULT_PROVIDER`, `ACOF_VERSION`, `ACOF_INSTALL_DIR` and the rest). This is a breaking change with no fallback: rename an existing `.rook/` folder, `~/.config/rook/` and any `ROOK_*` variables to keep using them. Releases and the installer come from `pdparchitect/acof`, as `acof-<version>-<os>-<arch>.tar.gz`. The Rook artwork is gone: the README has no banner, the run viewer takes zot's neutral look instead of a red accent, and the desktop image has a plain icon and wallpaper and an unbadged greeting.
 
 - **The README is minimalist; detail moved into `docs/`.** The front page had grown to ~500 lines; it now leads with the essentials - what Acof is, install, a first run, why, safety - and a Documentation section, matching zot's shape. The providers, configuration, objectives/flags, skills, how-it-works, safety and development sections moved into a `docs/` folder, each its own page.
 
