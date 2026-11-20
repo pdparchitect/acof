@@ -16,20 +16,20 @@ check() {
     fi
 }
 
-echo "rook selftest"
+echo "acof selftest"
 
-check "Rook runs" rook version
+check "Acof runs" acof version
 check "the workspace is writable" test -w /workspace
-# Rook is stateless; the one persisted path is its config dir (saved key + any
-# config.yaml) under ~/.config/rook.
-check "the config directory is writable" test -w "${HOME}/.config/rook"
-# `rook config` writes the provider key into ~/.config/rook/config.yaml,
-# which rook reads directly - there is no env-export hook.
-check "rook config resolves a path" rook config path
+# Acof is stateless; the one persisted path is its config dir (saved key + any
+# config.yaml) under ~/.config/acof.
+check "the config directory is writable" test -w "${HOME}/.config/acof"
+# `acof config` writes the provider key into ~/.config/acof/config.yaml,
+# which acof reads directly - there is no env-export hook.
+check "acof config resolves a path" acof config path
 
 if [ "$failures" -gt 0 ]; then
-    echo "rook selftest: $failures failed" >&2
+    echo "acof selftest: $failures failed" >&2
     exit 1
 fi
 
-echo "rook selftest: Rook is ready"
+echo "acof selftest: Acof is ready"

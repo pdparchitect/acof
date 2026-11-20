@@ -8,5 +8,5 @@
 dist
 go.work
 go.work.sum
-/rook
+/acof
 *.tar.gz

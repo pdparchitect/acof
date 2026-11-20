@@ -69,24 +69,24 @@ jobs:
           CGO_ENABLED: '0'
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          LDFLAGS="-s -w -X github.com/pdparchitect/rook/internal/version.Version=${VERSION}"
+          LDFLAGS="-s -w -X github.com/pdparchitect/acof/internal/version.Version=${VERSION}"
           EXT=""
           if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
 
-          OUTDIR="dist/rook-${VERSION}-${GOOS}-${GOARCH}"
+          OUTDIR="dist/acof-${VERSION}-${GOOS}-${GOARCH}"
           mkdir -p "${OUTDIR}"
 
-          echo "Building rook ${VERSION} for ${GOOS}/${GOARCH}..."
-          go build -trimpath -ldflags "${LDFLAGS}" -o "${OUTDIR}/rook${EXT}" ./cmd/rook
+          echo "Building acof ${VERSION} for ${GOOS}/${GOARCH}..."
+          go build -trimpath -ldflags "${LDFLAGS}" -o "${OUTDIR}/acof${EXT}" ./cmd/acof
 
           cp README.md LICENSE "${OUTDIR}/"
 
-          tar -czf "dist/rook-${VERSION}-${GOOS}-${GOARCH}.tar.gz" -C dist "rook-${VERSION}-${GOOS}-${GOARCH}"
+          tar -czf "dist/acof-${VERSION}-${GOOS}-${GOARCH}.tar.gz" -C dist "acof-${VERSION}-${GOOS}-${GOARCH}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: rook-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: acof-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/*.tar.gz
 
   publish:

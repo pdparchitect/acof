@@ -1,30 +1,30 @@
-# Rook desktop image
+# Acof desktop image
 
-A [Launcher](https://github.com/pdparchitect/launcher) product image: Rook, the
+A [Launcher](https://github.com/pdparchitect/launcher) product image: Acof, the
 AI bug-hunting harness, packaged as an isolated browser desktop you can install,
 run on real work, and remove cleanly.
 
-Rook is not an interactive chat — each run takes a task and an authorization
+Acof is not an interactive chat — each run takes a task and an authorization
 scope — so the desktop opens a **persistent terminal in `/workspace`** where you
-drive `rook`, rather than launching a long-running process.
+drive `acof`, rather than launching a long-running process.
 
 ## Layout
 
 ```text
 image/desktop/
-  Dockerfile        multi-stage: compile rook from this repo, then FROM the
+  Dockerfile        multi-stage: compile acof from this repo, then FROM the
                     published Launcher desktop base
   overlay/          files copied over the base defaults (root filesystem layout)
-    etc/profile.d/rook-env.sh          exports the saved API key into shells
+    etc/profile.d/acof-env.sh          exports the saved API key into shells
     etc/xdg/kitty/theme.conf           the terminal palette
     opt/browser/index.html             the browser landing page
     usr/local/bin/desktop-welcome      the terminal opened on start
     usr/local/bin/desktop-harness      Ctrl-Shift-G opens another terminal
     usr/local/bin/desktop-panel-status leaves the panel status slot empty
     usr/local/bin/desktop-selftest     live assertions for the smoke test
-    usr/local/bin/rook-greeting        the banner printed in the terminal
+    usr/local/bin/acof-greeting        the banner printed in the terminal
     usr/share/backgrounds/…            the wallpaper
-  theme/apply-theme.sh                 recolours the inherited chrome to Rook's
+  theme/apply-theme.sh                 recolours the inherited chrome to Acof's
                                        obsidian + crimson palette (build time)
   launcher/         the Launcher application bundle (application.json, artwork)
   tests/test-image.sh                  static checks
@@ -38,7 +38,7 @@ projects (buzzbox, buzznode). Run it from this directory:
 
 ```sh
 cd image/desktop
-make build     # build pdparchitect/rook-desktop:local (compiles rook from source)
+make build     # build pdparchitect/acof-desktop:local (compiles acof from source)
 make run       # start the container, publish the desktop, print the URLs
 make smoke     # wait for readiness and run the product selftest
 make stop      # remove the container
@@ -48,7 +48,7 @@ make test      # check + build + run + smoke
 
 `make run` publishes the desktop on <http://localhost:6901> and the bridge on
 <http://localhost:6902> (`/healthz`, `/preview.jpg`), mounts named volumes for
-`/workspace` and `/home/agent/.config/rook`, and passes any provider key set in
+`/workspace` and `/home/agent/.config/acof`, and passes any provider key set in
 your shell (`ZAI_API_KEY`, `OPENAI_API_KEY`, …) straight through. Common
 overrides:
 
@@ -63,8 +63,8 @@ module and embedded skills); the Makefile handles that. The equivalent raw
 command, if you prefer not to use `make`:
 
 ```sh
-docker build -f image/desktop/Dockerfile -t rook-desktop .   # run from the repo root
-docker run --rm -it --shm-size=1g -p 6901:6901 -p 6902:6902 rook-desktop
+docker build -f image/desktop/Dockerfile -t acof-desktop .   # run from the repo root
+docker run --rm -it --shm-size=1g -p 6901:6901 -p 6902:6902 acof-desktop
 ```
 
 `--shm-size=1g` matters: Chromium crashes on Docker's 64MB default. The desktop
@@ -74,12 +74,12 @@ substrate version for reproducible builds.
 
 ## The API key
 
-Rook talks straight to a model provider, so a run needs that provider's key.
-Rook defaults to the `zai` provider running `glm-5.2`, which reads `ZAI_API_KEY`.
-Setup is the built-in **`rook config`**: it seeds `~/.config/rook/config.yaml`
+Acof talks straight to a model provider, so a run needs that provider's key.
+Acof defaults to the `zai` provider running `glm-5.2`, which reads `ZAI_API_KEY`.
+Setup is the built-in **`acof config`**: it seeds `~/.config/acof/config.yaml`
 from the template on first run and opens it in `$EDITOR`, where you set the
-provider, model and `api_key`. The file lives on the persistent `~/.config/rook`
-volume and rook reads it directly. The panel shows `ROOK · RUN rook config`
+provider, model and `api_key`. The file lives on the persistent `~/.config/acof`
+volume and acof reads it directly. The panel shows `ACOF · RUN acof config`
 until a key is present.
 
 A key can equally be passed through the container environment - `make run`
@@ -87,7 +87,7 @@ forwards every provider variable set on the host.
 
 ## A future benchmark variant
 
-`image/desktop/` is one variant. A headless image for running Rook in
+`image/desktop/` is one variant. A headless image for running Acof in
 benchmarks would sit beside it as `image/bench/` with its own Dockerfile — most
 likely `FROM` a minimal base rather than the desktop substrate, sharing this
 repo's build stage. Nothing here assumes `desktop` is the only variant.

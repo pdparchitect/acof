@@ -1,8 +1,8 @@
 #!/bin/bash
 # desktop-panel-status - text for the tint2 status slot.
 #
-# Rook shows nothing here. Setup is prompted in the welcome terminal (the
-# rook-greeting banner says "run rook config" until a key is set), so a panel
+# Acof shows nothing here. Setup is prompted in the welcome terminal (the
+# acof-greeting banner says "run acof config" until a key is set), so a panel
 # label would only be decorative. Emitting no output leaves the slot empty and
 # suppresses any base default.
 

@@ -1,8 +1,8 @@
 #!/bin/bash
-# desktop-harness - Control-Shift-G opens another Rook terminal.
+# desktop-harness - Control-Shift-G opens another Acof terminal.
 
 set -euo pipefail
 
 exec kitty \
-    --title "${DESKTOP_TITLE:-Rook}" \
-    -e bash -lc 'cd /workspace && rook-greeting && exec bash -li'
+    --title "${DESKTOP_TITLE:-Acof}" \
+    -e bash -lc 'cd /workspace && acof-greeting && exec bash -li'

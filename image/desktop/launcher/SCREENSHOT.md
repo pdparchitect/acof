@@ -7,8 +7,8 @@ session, not a generated placeholder.
 To capture it:
 
 ```sh
-docker build -f image/desktop/Dockerfile -t rook-desktop .
-docker run --rm -it --shm-size=1g -p 6901:6901 -p 6902:6902 rook-desktop
+docker build -f image/desktop/Dockerfile -t acof-desktop .
+docker run --rm -it --shm-size=1g -p 6901:6901 -p 6902:6902 acof-desktop
 ```
 
 Open <http://localhost:6901>, let the welcome terminal settle, then save the

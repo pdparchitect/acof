@@ -7,7 +7,7 @@ import (
 	"github.com/openzot/openzot/agent"
 )
 
-// artifactRecorder persists a run's activity to the two on-disk artifacts Rook
+// artifactRecorder persists a run's activity to the two on-disk artifacts Acof
 // keeps per run: a live status.json snapshot and an append-only events.jsonl
 // log. It implements agent.Recorder, so the engine drives it from the same event
 // stream that feeds the viewer - rendering (the TUI) and recording (these files)
@@ -21,7 +21,7 @@ type artifactRecorder struct {
 	log    *eventLogger
 }
 
-// RecordMessage is unused: Rook's artifacts are an event log and a status
+// RecordMessage is unused: Acof's artifacts are an event log and a status
 // snapshot, not a message transcript.
 func (r *artifactRecorder) RecordMessage(agent.Message) error { return nil }
 

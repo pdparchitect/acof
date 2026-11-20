@@ -2,7 +2,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS  = -s -w -X github.com/pdparchitect/rook/internal/version.Version=$(VERSION)
+LDFLAGS  = -s -w -X github.com/pdparchitect/acof/internal/version.Version=$(VERSION)
 
 # go.mod pins the minimum patched toolchain. Some official Go and development
 # images export GOTOOLCHAIN=local, which turns a stale patch release into a hard
@@ -11,7 +11,7 @@ LDFLAGS  = -s -w -X github.com/pdparchitect/rook/internal/version.Version=$(VERS
 GOTOOLCHAIN = auto
 export GOTOOLCHAIN
 
-CMD       = rook
+CMD       = acof
 PLATFORMS = linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64
 
 GOOS   ?= $(shell go env GOHOSTOS)
@@ -19,14 +19,14 @@ GOARCH ?= $(shell go env GOHOSTARCH)
 
 .PHONY: help build dev run test race cover cover-check vet fmt lint clean dist cross
 
-# Listing the targets rather than assuming one: rook has two build variants that
+# Listing the targets rather than assuming one: acof has two build variants that
 # differ in what the binary may read from disk, and picking the wrong one
 # silently is exactly the confusion this avoids.
 help:
-	@echo "rook - an AI bug-hunting harness"
+	@echo "acof - an AI bug-hunting harness"
 	@echo
-	@echo "  make build      Build ./rook for release ($(GOOS)/$(GOARCH))"
-	@echo "  make dev        Build ./rook for development - see below"
+	@echo "  make build      Build ./acof for release ($(GOOS)/$(GOARCH))"
+	@echo "  make dev        Build ./acof for development - see below"
 	@echo "  make test       Run the test suite"
 	@echo "  make race       Run the test suite under the race detector"
 	@echo "  make cover      Report per-package test coverage"
@@ -39,10 +39,10 @@ help:
 	@echo "  make clean      Remove built binaries and dist/"
 	@echo
 	@echo "build vs dev: a release binary does NOT read a .env from its working"
-	@echo "  directory; a developer build does. rook runs shell commands against"
+	@echo "  directory; a developer build does. acof runs shell commands against"
 	@echo "  targets with a provider key in the process, so a released binary must"
 	@echo "  not take credentials from whatever directory it was pointed at. Both"
-	@echo "  write to ./rook - run './rook --version' to see which one you have."
+	@echo "  write to ./acof - run './acof --version' to see which one you have."
 	@echo
 	@echo "Overrides: VERSION=$(VERSION)"
 	@echo "           GOOS=$(GOOS) GOARCH=$(GOARCH)"
@@ -52,7 +52,7 @@ build:
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o $(CMD) ./cmd/$(CMD)
 
 # A developer build. The only difference is that it reads a .env from the
-# working directory, which a released binary must never do - pointing rook at a
+# working directory, which a released binary must never do - pointing acof at a
 # target's checkout would otherwise be enough to load whatever credentials are
 # lying around in it.
 dev:
@@ -72,7 +72,7 @@ race:
 	go test -race ./... -count=1
 
 cover:
-	@go test -cover ./... -count=1 | grep coverage | sed 's|github.com/pdparchitect/rook||'
+	@go test -cover ./... -count=1 | grep coverage | sed 's|github.com/pdparchitect/acof||'
 
 # The coverage gate, shared with CI so local and CI enforce the same number.
 # Override the bar with COVERAGE_THRESHOLD=80 make cover-check.

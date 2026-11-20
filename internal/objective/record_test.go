@@ -188,11 +188,11 @@ func TestAnObjectiveWithNoPathCannotBeRecorded(t *testing.T) {
 func TestTheDossierLayoutKeepsObjectivesAndRecordsTogether(t *testing.T) {
 	project := "/srv/target"
 
-	if got, want := ObjectivesDir(project), filepath.Join(project, ".rook", "objectives"); got != want {
+	if got, want := ObjectivesDir(project), filepath.Join(project, ".acof", "objectives"); got != want {
 		t.Errorf("ObjectivesDir = %q, want %q", got, want)
 	}
 
-	if got, want := RecordsDir(project), filepath.Join(project, ".rook", "records"); got != want {
+	if got, want := RecordsDir(project), filepath.Join(project, ".acof", "records"); got != want {
 		t.Errorf("RecordsDir = %q, want %q", got, want)
 	}
 }
@@ -294,7 +294,7 @@ func TestAReceiptWithNoProofSaysSo(t *testing.T) {
 }
 
 // The evidence is copied from the run's own record, never computed here - that
-// is what makes it evidence rather than rook vouching for rook.
+// is what makes it evidence rather than acof vouching for acof.
 func TestEvidenceIsCopiedFromTheRunSummary(t *testing.T) {
 	proof := EvidenceFromSummary("20260822-121212", &ArtifactSummary{
 		Reason:     "settled",

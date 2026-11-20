@@ -1,11 +1,11 @@
-# Releasing Rook
+# Releasing Acof
 
-This document describes how to build, version, and release Rook binaries.
+This document describes how to build, version, and release Acof binaries.
 
 ## Overview
 
-Rook uses **Git tags** to trigger automated releases. When a tag matching `v*`
-is pushed to the `pdparchitect/rook` repository, a GitHub Actions workflow builds
+Acof uses **Git tags** to trigger automated releases. When a tag matching `v*`
+is pushed to the `pdparchitect/acof` repository, a GitHub Actions workflow builds
 multi-platform binaries and publishes them as a GitHub Release.
 
 ### Engine dependency
@@ -45,7 +45,7 @@ Use semantic versioning: `vMAJOR.MINOR.PATCH` (with the `v` prefix).
 The [release workflow](.github/workflows/release.yaml) runs automatically and:
 
 1. Resolves the pinned engine module.
-2. Builds the `rook` binary for each target platform.
+2. Builds the `acof` binary for each target platform.
 3. Packages each into a `.tar.gz` archive (with README and LICENSE).
 4. Generates SHA-256 checksums.
 5. Creates a GitHub Release with auto-generated notes.
@@ -80,7 +80,7 @@ make test
 ## Update notifications
 
 Release binaries check for newer versions by querying the GitHub Releases API
-on `rook version` and after a run. The check is **skipped entirely** for `dev`
+on `acof version` and after a run. The check is **skipped entirely** for `dev`
 builds, so it only applies to distributed binaries.
 
 ## Versioning guidelines

@@ -1,10 +1,10 @@
-// Package agent wires Rook's autonomous security agent on top of the zot
+// Package agent wires Acof's autonomous security agent on top of the zot
 // engine. It loads the embedded skill catalog, layers on any skills the user
-// has in ~/.config/rook/skills, registers the default file and shell tools, and
+// has in ~/.config/acof/skills, registers the default file and shell tools, and
 // drives the agent loop until it exits.
 //
 // The engine runs in this process and talks straight to a model provider, so a
-// run needs nothing but a provider key - no hosted service sits between Rook
+// run needs nothing but a provider key - no hosted service sits between Acof
 // and the model.
 package agent
 
@@ -18,11 +18,10 @@ import (
 	"path/filepath"
 	"time"
 
-	rook "github.com/pdparchitect/rook"
-	"github.com/pdparchitect/rook/internal/config"
-	"github.com/pdparchitect/rook/internal/objective"
+	acof "github.com/pdparchitect/acof"
+	"github.com/pdparchitect/acof/internal/config"
+	"github.com/pdparchitect/acof/internal/objective"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/openzot/openzot/agent"
 	"github.com/openzot/openzot/session"
 	"github.com/openzot/openzot/tui"
@@ -33,14 +32,6 @@ import (
 // on; the value is generous because a security run legitimately produces a long
 // final report before it calls a terminal tool.
 const defaultMaxSettles = 20
-
-// rookTheme is Rook's identity in the shared viewer: red, distinct from zot's
-// neutral slate and pion's blue. Only the accent is themed - the semantic status
-// colours (running / done / failed) stay fixed across every embedding app.
-var rookTheme = tui.Theme{
-	Accent:    lipgloss.Color("#DC2626"), // red-600
-	Secondary: lipgloss.Color("#F87171"), // red-400
-}
 
 // Config controls a single autonomous run.
 type Config struct {
@@ -98,7 +89,7 @@ type Config struct {
 // (the stop reason and summary the terminal tool carried), so a batch can
 // record the result and a draft run can collect its deliverable.
 func Run(ctx context.Context, cfg Config) (int, tui.Outcome, error) {
-	subFS, err := fs.Sub(rook.SkillsFS, "skills")
+	subFS, err := fs.Sub(acof.SkillsFS, "skills")
 	if err != nil {
 		return 1, tui.Outcome{}, fmt.Errorf("open embedded skills: %w", err)
 	}
@@ -160,10 +151,10 @@ func Run(ctx context.Context, cfg Config) (int, tui.Outcome, error) {
 	maxDuration, _ := cfg.Tuning.MaxDuration()
 
 	// Settle mode: a run ends only when the agent records an outcome, never
-	// because its prose happened to sound conclusive. Rook is unattended by
+	// because its prose happened to sound conclusive. Acof is unattended by
 	// design - nobody is watching to judge whether "I have finished the audit"
 	// actually means finished - so an unambiguous ending matters more here than
-	// almost anywhere. The config may raise or lower it; unset keeps Rook's
+	// almost anywhere. The config may raise or lower it; unset keeps Acof's
 	// generous default.
 	maxSettles := cfg.Tuning.MaxSettles
 	if maxSettles == 0 {
@@ -270,7 +261,7 @@ func Run(ctx context.Context, cfg Config) (int, tui.Outcome, error) {
 
 		writer, err := session.Start(cfg.SessionDir, time.Now(), meta)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "rook: session log unavailable: %v\n", err)
+			fmt.Fprintf(os.Stderr, "acof: session log unavailable: %v\n", err)
 		} else {
 			defer writer.Close()
 
@@ -293,19 +284,18 @@ func Run(ctx context.Context, cfg Config) (int, tui.Outcome, error) {
 
 	workdir, _ := os.Getwd()
 
-	// The viewer is zot's shared TUI package, themed for Rook: a red identity, the
-	// "rook" name in the badge, and the run's iteration cap shown as progress. It
+	// The viewer is zot's shared TUI package, themed for Acof: a red identity, the
+	// "acof" name in the badge, and the run's iteration cap shown as progress. It
 	// renders the full-screen view on a terminal and streams plain text otherwise
 	// - or when --verbose is set, so the reasoning tokens stay in a pipe or log.
 	outcome, err := tui.Run(ctx, client, tui.Meta{
-		AppName:       "rook",
+		AppName:       "acof",
 		Task:          task,
 		Title:         cfg.Objective.DisplayTitle(),
 		Model:         cfg.Model,
 		Provider:      cfg.Provider,
 		Workdir:       workdir,
 		Plain:         cfg.Verbose,
-		Theme:         rookTheme,
 		MaxIterations: cfg.MaxIterations,
 	}, opts)
 
@@ -313,7 +303,7 @@ func Run(ctx context.Context, cfg Config) (int, tui.Outcome, error) {
 	// session was recorded - its id and the exact command to resume it. Printed
 	// after the viewer restores the terminal, so it survives on the main screen
 	// where the alt-screen stats did not.
-	printDigest(os.Stderr, "rook", sessionID, outcome, summaryRec.Summary)
+	printDigest(os.Stderr, "acof", sessionID, outcome, summaryRec.Summary)
 
 	// tui.Run reports an agent-declared failure (a _failure outcome) as an
 	// *AgentExitError: that is a completed run with a nonzero exit code, not a

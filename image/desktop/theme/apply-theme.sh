@@ -1,7 +1,7 @@
 #!/bin/bash
-# Recolour the inherited desktop chrome into Rook's palette.
+# Recolour the inherited desktop chrome into Acof's palette.
 #
-# Rook is an offensive-security agent, so the surface leans into the red-team
+# Acof is an offensive-security agent, so the surface leans into the red-team
 # signature: an obsidian canvas and chrome, hairlines and window edges in white,
 # and one crimson accent carrying the interactive bits. The desktop is not pure
 # black, and the accent is not the chrome - white does the outlining, exactly as

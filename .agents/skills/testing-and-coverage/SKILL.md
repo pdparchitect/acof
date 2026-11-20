@@ -1,6 +1,6 @@
 ---
 name: testing-and-coverage
-description: How tests are written and how the 75% coverage gate is enforced in the rook repository. Read this before adding or changing tests, or when the coverage gate fails.
+description: How tests are written and how the 75% coverage gate is enforced in the acof repository. Read this before adding or changing tests, or when the coverage gate fails.
 ---
 
 # Testing and coverage
@@ -22,10 +22,10 @@ behaviour broke." Coverage is gated at 75% so that bar cannot quietly erode.
 
 ## Why 75% and not 90%
 
-zot's gate is 90% because its engine is fully testable in-process. rook wraps that
+zot's gate is 90% because its engine is fully testable in-process. acof wraps that
 engine and adds thin packages that are partly wiring:
 
-- `cmd/rook` - CLI entry point; `run()`, `execute()` and `startWatch()` need a
+- `cmd/acof` - CLI entry point; `run()`, `execute()` and `startWatch()` need a
   provider or a blocking loop.
 - `internal/buildinfo` - compile-time injected values.
 - `internal/agent` - `Run()` boots a real model client, so only the non-provider

@@ -1,7 +1,7 @@
-// Package objective defines the mission file: the document a rook run is
+// Package objective defines the mission file: the document a acof run is
 // dispatched from.
 //
-// rook deliberately takes no prose on the command line. A security engagement
+// acof deliberately takes no prose on the command line. A security engagement
 // accepts a mission brief, not a conversation - a durable objective, the
 // success criteria that define "done", and the rules of engagement the work
 // must hold to. The objective is a file so it outlives the invocation: it can
@@ -30,16 +30,16 @@ import (
 // The dossier's layout. A project's objectives and the ledger of what has been
 // run from them live together under one dotted directory at its root, the way
 // every other tool that keeps state in a repository does it:
-// .rook/objectives/<slug>.yaml and .rook/records/<slug>/<run>.yaml. Two top-level
+// .acof/objectives/<slug>.yaml and .acof/records/<slug>/<run>.yaml. Two top-level
 // objectives/ and records/ directories claimed generic names in the root of
-// somebody else's project, which is not rook's to take.
+// somebody else's project, which is not acof's to take.
 //
 // Only the defaults live here. An objective may be read from anywhere, and the
 // ledger root is configurable - see Ledger - so this names the convention rather
 // than enforcing it.
 const (
 	// DossierDir is the per-project directory holding both.
-	DossierDir = ".rook"
+	DossierDir = ".acof"
 
 	objectivesName = "objectives"
 	recordsName    = "records"
@@ -84,7 +84,7 @@ type Objective struct {
 }
 
 // List returns the objective files directly inside dir, in filename order - the
-// batch a bare `rook` runs. Only the top level is listed, matching the shell
+// batch a bare `acof` runs. Only the top level is listed, matching the shell
 // glob the invocation is named after, and a missing directory is an empty
 // listing rather than an error: a project with no dossier yet simply has no
 // outstanding work.
@@ -297,7 +297,7 @@ func nameFor(o Objective) string {
 func template(o Objective) string {
 	var b strings.Builder
 
-	b.WriteString("# rook objective - what to do, what \"done\" means, and where you are allowed to do it.\n\n")
+	b.WriteString("# acof objective - what to do, what \"done\" means, and where you are allowed to do it.\n\n")
 
 	// The title is optional and the file name stands in for it, so an untitled
 	// objective gets a commented stub: discoverable without implying the field is
